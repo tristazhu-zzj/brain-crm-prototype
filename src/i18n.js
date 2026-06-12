@@ -24,8 +24,8 @@ export const t = {
     cancel: '取消',
     connect: '连接',
     redirecting: '正在跳转授权页面...',
-    sfDesc: 'Opportunity · Contact · Activity',
-    hsDesc: 'Deal · Contact',
+    sfDesc: 'Opportunity · Event · Task',
+    hsDesc: 'Deal · Task',
 
     // DealMatch
     stepDeal: '匹配',
@@ -40,27 +40,25 @@ export const t = {
     continue: '继续 →',
     matchBadge: '% 匹配',
 
-    // PropertyReview
+    // PropertyReview / PropertyCard
     stepReview: '审核 AI 生成内容',
     newFieldAlert: 'Salesforce 新增了 2 个字段：',
     addFields: '添加',
     ignore: '忽略',
     fieldCount: '字段',
-    manageFields: '管理字段 ⚙️',
-    selectFields: '选择要同步的字段：',
     originalValue: '原值',
     clickToEdit: '点击输入...',
     append: '追加',
     overwrite: '覆盖',
-    syncActivity: '是否同步活动',
-    demoHasLinked: '当前：有关联活动',
-    demoNoLinked: '当前：无关联活动',
-    demoSwitchTo: (has) => has ? '切换为：无关联活动' : '切换为：有关联活动',
-    hasLinkedDesc: (n) => `该 Opportunity 下已有 ${n} 个关联活动，选择要更新的：`,
-    noLinkedDesc: '该 Opportunity 下暂无关联活动：',
-    searchOther: '🔍 搜索其他活动',
-    createNew: '＋ 新建活动',
-    searchPlaceholder: '搜索 CRM 中的活动...',
+
+    // Event (formerly Activity)
+    syncEvent: '是否同步 Event',
+    syncEventDesc: '会议结束后同步至 Salesforce Event 记录',
+    hasLinkedDesc: (n) => `该 Opportunity 下已有 ${n} 个关联 Event，选择要更新的：`,
+    noLinkedDesc: '该 Opportunity 下暂无关联 Event：',
+    searchOther: '🔍 搜索其他 Event',
+    createNew: '＋ 新建 Event',
+    searchPlaceholder: '搜索 CRM 中的 Event...',
     willLinkTo: '将关联到：',
     aiPrefilled: 'AI 已预填',
     activityTitle: '标题',
@@ -68,8 +66,19 @@ export const t = {
     activityDate: '日期',
     activityDesc: '描述',
     autoLink: (name) => `创建后将自动关联到：${name}`,
+    demoSwitchTo: (has) => has ? '切换为：无关联 Event' : '切换为：有关联 Event',
+
+    // Task
+    taskSection: '待办事项',
+    taskFrom: 'AI 从会议 Next Steps 中提取',
+    taskAddManual: '+ 手动添加',
+    taskPlaceholder: '输入待办事项...',
+    taskDueDate: '截止日期',
+    taskDeleteConfirm: '删除',
+
+    // Sync button
     back: '返回',
-    syncBtn: (n, crm) => `同步 ${n} 个字段到 ${crm} →`,
+    syncBtn: (n, crm) => `同步到 ${crm} →`,
 
     // SyncResult
     syncDone: '同步完成',
@@ -79,6 +88,21 @@ export const t = {
     backToBrain: '返回 Brain ←',
     activityCreated: '已创建',
     appendedNote: '已追加',
+
+    // Settings
+    settingsDesc: 'Workspace 级别配置，由 Admin/Owner 管理',
+    crmConnection: 'CRM 连接',
+    connected: '已连接',
+    propertySyncConfig: 'Property 同步配置',
+    propertyList: 'Property 列表',
+    promptSet: '已设置 Prompt ✓',
+    promptAdd: '+ Prompt',
+    promptPlaceholder: '描述此字段的生成要求，不填则 AI 按字段名自动理解...',
+    promptHint: '留空时 AI 会根据字段名和类型自动生成内容',
+    saveSettings: '保存设置',
+    refreshFields: '刷新字段',
+    refreshing: '获取中...',
+    refreshDone: '已更新',
   },
   ja: {
     // Sidebar
@@ -105,8 +129,8 @@ export const t = {
     cancel: 'キャンセル',
     connect: '連携する',
     redirecting: '認証ページへ遷移中...',
-    sfDesc: 'Opportunity · Contact · Activity',
-    hsDesc: 'Deal · Contact',
+    sfDesc: 'Opportunity · Event · Task',
+    hsDesc: 'Deal · Task',
 
     // DealMatch
     stepDeal: 'マッチング',
@@ -121,27 +145,25 @@ export const t = {
     continue: 'で続ける →',
     matchBadge: '% 一致',
 
-    // PropertyReview
+    // PropertyReview / PropertyCard
     stepReview: 'AI 生成内容を確認',
     newFieldAlert: 'Salesforce に新しいフィールドが 2 件追加されました：',
     addFields: '追加',
     ignore: '無視',
     fieldCount: 'フィールド',
-    manageFields: 'フィールド管理 ⚙️',
-    selectFields: '同期するフィールドを選択：',
     originalValue: '現在値',
     clickToEdit: 'クリックして入力...',
     append: '追記',
     overwrite: '上書き',
-    syncActivity: 'アクティビティを同期する',
-    demoHasLinked: '現在：関連あり',
-    demoNoLinked: '現在：関連なし',
-    demoSwitchTo: (has) => has ? '切替：関連なし' : '切替：関連あり',
-    hasLinkedDesc: (n) => `この Opportunity には ${n} 件の関連アクティビティがあります。更新するものを選択：`,
-    noLinkedDesc: 'この Opportunity には関連アクティビティがありません：',
-    searchOther: '🔍 他のアクティビティを検索',
-    createNew: '＋ 新規アクティビティ',
-    searchPlaceholder: 'CRM のアクティビティを検索...',
+
+    // Event
+    syncEvent: 'Event を同期する',
+    syncEventDesc: '会議終了後に Salesforce Event レコードへ同期',
+    hasLinkedDesc: (n) => `この Opportunity には ${n} 件の関連 Event があります。更新するものを選択：`,
+    noLinkedDesc: 'この Opportunity には関連 Event がありません：',
+    searchOther: '🔍 他の Event を検索',
+    createNew: '＋ 新規 Event',
+    searchPlaceholder: 'CRM の Event を検索...',
     willLinkTo: '関連付け先：',
     aiPrefilled: 'AI が事前入力済み',
     activityTitle: 'タイトル',
@@ -149,8 +171,19 @@ export const t = {
     activityDate: '日付',
     activityDesc: '説明',
     autoLink: (name) => `作成後、自動的に関連付けられます：${name}`,
+    demoSwitchTo: (has) => has ? '切替：関連 Event なし' : '切替：関連 Event あり',
+
+    // Task
+    taskSection: 'タスク',
+    taskFrom: 'AI が会議の Next Steps から抽出',
+    taskAddManual: '+ 手動追加',
+    taskPlaceholder: 'タスクを入力...',
+    taskDueDate: '期限',
+    taskDeleteConfirm: '削除',
+
+    // Sync button
     back: '戻る',
-    syncBtn: (n, crm) => `${n} 件のフィールドを ${crm} に同期 →`,
+    syncBtn: (n, crm) => `${crm} に同期 →`,
 
     // SyncResult
     syncDone: '同期完了',
@@ -160,5 +193,20 @@ export const t = {
     backToBrain: 'Brain に戻る ←',
     activityCreated: '作成済み',
     appendedNote: '追記済み',
+
+    // Settings
+    settingsDesc: 'Workspace レベルの設定。Admin/Owner が管理します',
+    crmConnection: 'CRM 連携',
+    connected: '連携済み',
+    propertySyncConfig: 'プロパティ同期設定',
+    propertyList: 'プロパティリスト',
+    promptSet: 'Prompt 設定済み ✓',
+    promptAdd: '+ Prompt',
+    promptPlaceholder: 'このフィールドの生成要件を記入。空白の場合は AI がフィールド名から自動生成...',
+    promptHint: '空白の場合、AI はフィールド名と型から自動的に内容を生成します',
+    saveSettings: '設定を保存',
+    refreshFields: 'フィールドを更新',
+    refreshing: '取得中...',
+    refreshDone: '更新済み',
   },
 }

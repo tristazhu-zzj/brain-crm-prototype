@@ -9,42 +9,52 @@ const INITIAL_PROPERTIES = [
   { key: 'description', label: 'Description / Notes', type: 'textarea', current: 'Initial contact made in April 2026.', generated: { zh: '2026-06-10 会议：讨论 Q3 续约，预算从 $100K 提升至 $120K，竞品提及 Notion AI，客户倾向续约。', ja: '2026-06-10 ミーティング：Q3 更新、予算 $100K→$120K、競合 Notion AI 言及、顧客は更新傾向。' }, mode: 'append', included: true },
 ]
 
-const LINKED_ACTIVITIES = [
+const LINKED_EVENTS = [
   { id: 'a1', title: 'Q2 Check-in Call', date: '2026-05-15', type: 'Call', desc: { zh: '季度进展确认，预算审批中。', ja: '四半期進捗確認、予算承認中。' } },
   { id: 'a2', title: 'Renewal Discussion', date: '2026-06-01', type: 'Meeting', desc: { zh: '初步讨论续约条款。', ja: '更新条件の初期協議。' } },
 ]
 
-const ALL_ACTIVITIES = [
+const ALL_EVENTS = [
   { id: 'b1', title: 'Follow-up Call — Acme', date: '2026-06-08', type: 'Call', desc: { zh: '跟进上次演示反馈。', ja: '前回デモのフォローアップ。' } },
   { id: 'b2', title: 'Proposal Review Meeting', date: '2026-06-03', type: 'Meeting', desc: { zh: '审阅合同草稿。', ja: '契約書草案のレビュー。' } },
   { id: 'b3', title: 'Intro Email — Sarah Chen', date: '2026-05-20', type: 'Email', desc: { zh: '初次接触邮件。', ja: '初回コンタクトメール。' } },
 ]
 
-const AI_ACTIVITY = {
+const AI_EVENT = {
   title: 'Q3 Business Review — Acme Corp',
   date: '2026-06-10', type: 'Meeting',
   description: { zh: '与 Sarah Chen、David Park 会议。议题：Q3 续约（$120K）、技术演示安排、竞品对比。结果：客户倾向续约，下步安排技术演示。', ja: 'Sarah Chen・David Park とのミーティング。議題：Q3 更新（$120K）、テクニカルデモ設定、競合比較。結果：顧客は更新傾向、次ステップはデモ設定。' },
 }
 
-const NEW_PROPERTIES = [
-  { key: 'budget_range', label: 'Budget Range', type: 'enum', options: ['< $50K', '$50K–$100K', '$100K–$200K', '> $200K'] },
-  { key: 'use_case', label: 'Use Case', type: 'text' },
+const AI_TASKS = [
+  { id: 1, title: { zh: '安排技术演示', ja: 'テクニカルデモを設定' }, due: '2026-07-10' },
+  { id: 2, title: { zh: '发送合同草稿', ja: '契約書草案を送付' }, due: '2026-07-05' },
+  { id: 3, title: { zh: '确认预算审批', ja: '予算承認を確認' }, due: '' },
 ]
+
+const NEW_PROPERTIES = []
 
 export default function PropertyCard({ crm, deal, onSync, T, lang }) {
   const isSalesforce = crm === 'salesforce'
   const [properties, setProperties] = useState(INITIAL_PROPERTIES.map(p => ({ ...p, generatedVal: p.generated[lang] })))
-  const [activityEnabled, setActivityEnabled] = useState(isSalesforce)
-  const [newActivity, setNewActivity] = useState({ ...AI_ACTIVITY, description: AI_ACTIVITY.description[lang] })
+  const [eventEnabled, setEventEnabled] = useState(isSalesforce)
+  const [newEvent, setNewEvent] = useState({ ...AI_EVENT, description: AI_EVENT.description[lang] })
   const [hasLinked, setHasLinked] = useState(true)
-  const [showManage, setShowManage] = useState(false)
-  const [newPropAlert, setNewPropAlert] = useState(true)
-  const [addedNew, setAddedNew] = useState([])
+  const [tasks, setTasks] = useState(AI_TASKS.map(tk => ({ ...tk, title: tk.title[lang], checked: true })))
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [addingTask, setAddingTask] = useState(false)
 
   const included = properties.filter(p => p.included)
 
   function updateProp(key, field, value) {
     setProperties(ps => ps.map(p => p.key === key ? { ...p, [field]: value } : p))
+  }
+
+  function addTask() {
+    if (!newTaskTitle.trim()) return
+    setTasks(ts => [...ts, { id: Date.now(), title: newTaskTitle, due: '', checked: true }])
+    setNewTaskTitle('')
+    setAddingTask(false)
   }
 
   return (
@@ -59,51 +69,63 @@ export default function PropertyCard({ crm, deal, onSync, T, lang }) {
         <span>{deal?.amount}</span>
       </div>
 
-      {/* New property alert */}
-      {newPropAlert && (
-        <div className="bg-amber-900/30 border border-amber-700/50 rounded-xl px-3 py-2 flex items-center gap-2">
-          <span className="text-amber-400 text-xs">✨</span>
-          <p className="text-xs text-amber-300 flex-1">{T.newFieldAlert} <strong>Budget Range</strong>、<strong>Use Case</strong></p>
-          <button onClick={() => { NEW_PROPERTIES.forEach(np => { setProperties(ps => [...ps, { ...np, current: '', generatedVal: '', mode: 'overwrite', included: true }]); setAddedNew(a => [...a, np.key]) }); setNewPropAlert(false) }}
-            className="text-xs bg-amber-600 hover:bg-amber-500 px-2 py-1 rounded-lg transition-colors font-medium shrink-0">{T.addFields}</button>
-          <button onClick={() => setNewPropAlert(false)} className="text-xs text-gray-500 hover:text-white transition-colors shrink-0">{T.ignore}</button>
-        </div>
-      )}
-
-      {/* Field list header */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-500 uppercase tracking-wide">{T.fieldCount} ({included.length})</p>
-        <button onClick={() => setShowManage(m => !m)} className="text-xs text-violet-400 hover:text-violet-300 transition-colors">{T.manageFields}</button>
-      </div>
-
-      {showManage && (
-        <div className="bg-gray-800 rounded-xl p-3 flex flex-col gap-2">
-          <p className="text-xs text-gray-400 mb-1">{T.selectFields}</p>
-          {properties.map(p => (
-            <label key={p.key} className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={p.included} onChange={e => updateProp(p.key, 'included', e.target.checked)} className="accent-violet-500" />
-              <span className={p.included ? 'text-white' : 'text-gray-500'}>{p.label}</span>
-              <span className="text-xs text-gray-600">{p.type}</span>
-            </label>
-          ))}
-        </div>
-      )}
+      {/* Field count */}
+      <p className="text-xs text-gray-500 uppercase tracking-wide">{T.fieldCount} ({included.length})</p>
 
       {/* Properties */}
-      {included.map(p => <PropRow key={p.key} prop={p} T={T} isNew={addedNew.includes(p.key)} onChange={(f, v) => updateProp(p.key, f, v)} />)}
+      {included.map(p => <PropRow key={p.key} prop={p} T={T} onChange={(f, v) => updateProp(p.key, f, v)} />)}
 
-      {/* Activity */}
+      {/* Task section */}
+      <div className="bg-gray-800 rounded-xl overflow-hidden">
+        <div className="px-3 py-2.5 border-b border-gray-700 flex items-center gap-2">
+          <span className="text-sm">✅</span>
+          <p className="text-sm font-medium flex-1">{T.taskSection}</p>
+          <span className="text-xs text-gray-500">{T.taskFrom}</span>
+        </div>
+        <div className="p-3 flex flex-col gap-2">
+          {tasks.map(tk => (
+            <div key={tk.id} className="flex items-center gap-2">
+              <input type="checkbox" checked={tk.checked} onChange={() => setTasks(ts => ts.map(t => t.id === tk.id ? { ...t, checked: !t.checked } : t))}
+                className="accent-violet-500 shrink-0" />
+              <input value={tk.title} onChange={e => setTasks(ts => ts.map(t => t.id === tk.id ? { ...t, title: e.target.value } : t))}
+                className={`flex-1 bg-transparent text-sm outline-none border-b border-transparent focus:border-gray-600 transition-colors ${!tk.checked ? 'line-through text-gray-500' : 'text-white'}`} />
+              <input type="date" value={tk.due} onChange={e => setTasks(ts => ts.map(t => t.id === tk.id ? { ...t, due: e.target.value } : t))}
+                className="bg-gray-700 border border-gray-600 rounded px-2 py-0.5 text-xs outline-none text-gray-400 w-32" />
+              <button onClick={() => setTasks(ts => ts.filter(t => t.id !== tk.id))} className="text-gray-600 hover:text-red-400 transition-colors text-xs">✕</button>
+            </div>
+          ))}
+          {addingTask ? (
+            <div className="flex items-center gap-2 mt-1">
+              <input autoFocus value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') addTask(); if (e.key === 'Escape') setAddingTask(false) }}
+                placeholder={T.taskPlaceholder}
+                className="flex-1 bg-gray-700 border border-violet-500 rounded-lg px-3 py-1.5 text-sm outline-none placeholder-gray-600" />
+              <button onClick={addTask} className="text-xs bg-violet-600 hover:bg-violet-500 px-2 py-1.5 rounded-lg transition-colors">+</button>
+              <button onClick={() => setAddingTask(false)} className="text-xs text-gray-500 hover:text-white transition-colors">✕</button>
+            </div>
+          ) : (
+            <button onClick={() => setAddingTask(true)} className="text-xs text-gray-500 hover:text-violet-400 transition-colors self-start mt-1">
+              {T.taskAddManual}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Event (Salesforce only) */}
       {isSalesforce && (
         <div className="bg-gray-800 rounded-xl overflow-hidden">
           <div className="px-3 py-2.5 flex items-center gap-2 border-b border-gray-700">
             <span className="text-sm">📆</span>
-            <p className="text-sm font-medium flex-1">{T.syncActivity}</p>
-            <Toggle value={activityEnabled} onChange={setActivityEnabled} />
+            <div className="flex-1">
+              <p className="text-sm font-medium">{T.syncEvent}</p>
+              <p className="text-xs text-gray-500">{T.syncEventDesc}</p>
+            </div>
+            <Toggle value={eventEnabled} onChange={setEventEnabled} />
           </div>
-          {activityEnabled && (
+          {eventEnabled && (
             <div className="p-3">
-              <ActivityPanel hasLinked={hasLinked} linkedActivities={LINKED_ACTIVITIES}
-                newActivity={newActivity} onNewActivityChange={v => setNewActivity(a => ({...a, ...v}))}
+              <EventPanel hasLinked={hasLinked} linkedEvents={LINKED_EVENTS}
+                newEvent={newEvent} onNewEventChange={v => setNewEvent(a => ({...a, ...v}))}
                 dealName={deal?.name} T={T} lang={lang} />
             </div>
           )}
@@ -115,7 +137,6 @@ export default function PropertyCard({ crm, deal, onSync, T, lang }) {
         </button>
       )}
 
-      {/* Sync button */}
       <button onClick={onSync} className="w-full bg-violet-600 hover:bg-violet-500 py-2.5 rounded-xl text-sm font-medium transition-colors mt-1">
         {T.syncBtn(included.length, crm === 'salesforce' ? 'Salesforce' : 'Hubspot')}
       </button>
@@ -133,17 +154,11 @@ function PropRow({ prop, T, isNew, onChange }) {
       <div className="px-3 py-2.5">
         <div className="flex items-center gap-2 mb-1.5">
           <span className="text-sm font-medium">{prop.label}</span>
-          {isNew && <span className="text-xs bg-amber-900/50 text-amber-400 px-1.5 py-0.5 rounded-full">NEW</span>}
           <span className="text-xs text-gray-600 bg-gray-700 px-1.5 py-0.5 rounded">{prop.type}</span>
           <div className="ml-auto">
-            {canToggle ? (
-              <button onClick={() => onChange('mode', prop.mode === 'append' ? 'overwrite' : 'append')}
-                className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${prop.mode === 'append' ? 'border-blue-600 text-blue-400 bg-blue-900/20' : 'border-gray-600 text-gray-500'}`}>
-                {prop.mode === 'append' ? T.append : T.overwrite}
-              </button>
-            ) : (
-              <span className="text-xs text-gray-700 px-2 py-0.5 rounded-full border border-gray-700">{T.overwrite}</span>
-            )}
+            <span className={`text-xs px-2 py-0.5 rounded-full border ${canToggle && prop.mode === 'append' ? 'border-blue-800 text-blue-500' : 'border-gray-700 text-gray-600'}`}>
+              {canToggle && prop.mode === 'append' ? T.append : T.overwrite}
+            </span>
           </div>
         </div>
         {prop.current && (
@@ -181,30 +196,30 @@ function PropRow({ prop, T, isNew, onChange }) {
 
 function Toggle({ value, onChange }) {
   return (
-    <button onClick={() => onChange(!value)} className={`w-9 h-5 rounded-full transition-colors relative ${value ? 'bg-violet-600' : 'bg-gray-600'}`}>
-      <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 transition-all ${value ? 'left-4.5' : 'left-0.5'}`} style={{ left: value ? '18px' : '2px' }} />
+    <button onClick={() => onChange(!value)} className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${value ? 'bg-violet-600' : 'bg-gray-600'}`}>
+      <div className="w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 transition-all" style={{ left: value ? '18px' : '2px' }} />
     </button>
   )
 }
 
-function ActivityPanel({ hasLinked, linkedActivities, newActivity, onNewActivityChange, dealName, T, lang }) {
-  const [selectedId, setSelectedId] = useState(hasLinked ? linkedActivities[0]?.id : null)
+function EventPanel({ hasLinked, linkedEvents, newEvent, onNewEventChange, dealName, T, lang }) {
+  const [selectedId, setSelectedId] = useState(hasLinked ? linkedEvents[0]?.id : null)
   const [extra, setExtra] = useState('none')
   const [searchQ, setSearchQ] = useState('')
   const TYPES = ['Call', 'Meeting', 'Email', 'Task']
 
-  const filtered = ALL_ACTIVITIES.filter(a =>
+  const filtered = ALL_EVENTS.filter(a =>
     a.title.toLowerCase().includes(searchQ.toLowerCase()) || a.type.toLowerCase().includes(searchQ.toLowerCase())
   )
 
-  function selectActivity(id) { setSelectedId(id); setExtra('none') }
+  function selectEvent(id) { setSelectedId(id); setExtra('none') }
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs text-gray-400">{hasLinked ? T.hasLinkedDesc(linkedActivities.length) : T.noLinkedDesc}</p>
+      <p className="text-xs text-gray-400">{hasLinked ? T.hasLinkedDesc(linkedEvents.length) : T.noLinkedDesc}</p>
 
-      {hasLinked && linkedActivities.map(a => (
-        <button key={a.id} onClick={() => selectActivity(a.id)}
+      {hasLinked && linkedEvents.map(a => (
+        <button key={a.id} onClick={() => selectEvent(a.id)}
           className={`w-full text-left p-2.5 rounded-xl border-2 transition-all ${selectedId === a.id && extra === 'none' ? 'border-violet-500 bg-violet-900/20' : 'border-gray-700 hover:border-gray-600'}`}>
           <div className="flex items-start gap-2">
             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${selectedId === a.id && extra === 'none' ? 'border-violet-400 bg-violet-500' : 'border-gray-600'}`}>
@@ -237,7 +252,7 @@ function ActivityPanel({ hasLinked, linkedActivities, newActivity, onNewActivity
           <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder={T.searchPlaceholder}
             className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm outline-none focus:border-violet-500 transition-colors placeholder-gray-500" />
           {filtered.map(a => (
-            <button key={a.id} onClick={() => selectActivity(a.id)}
+            <button key={a.id} onClick={() => selectEvent(a.id)}
               className={`w-full text-left p-2.5 rounded-xl border-2 transition-all ${selectedId === a.id ? 'border-violet-500 bg-violet-900/20' : 'border-gray-700 hover:border-gray-600'}`}>
               <div className="flex items-start gap-2">
                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${selectedId === a.id ? 'border-violet-400 bg-violet-500' : 'border-gray-600'}`}>
@@ -268,25 +283,25 @@ function ActivityPanel({ hasLinked, linkedActivities, newActivity, onNewActivity
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="text-xs text-gray-500 block mb-1">{T.activityTitle}</label>
-              <input value={newActivity.title} onChange={e => onNewActivityChange({ title: e.target.value })}
+              <input value={newEvent.title} onChange={e => onNewEventChange({ title: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-violet-500 transition-colors" />
             </div>
             <div>
               <label className="text-xs text-gray-500 block mb-1">{T.activityType}</label>
-              <select value={newActivity.type} onChange={e => onNewActivityChange({ type: e.target.value })}
+              <select value={newEvent.type} onChange={e => onNewEventChange({ type: e.target.value })}
                 className="bg-gray-700 border border-gray-600 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-violet-500 transition-colors">
                 {TYPES.map(tp => <option key={tp}>{tp}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs text-gray-500 block mb-1">{T.activityDate}</label>
-              <input type="date" value={newActivity.date} onChange={e => onNewActivityChange({ date: e.target.value })}
+              <input type="date" value={newEvent.date} onChange={e => onNewEventChange({ date: e.target.value })}
                 className="bg-gray-700 border border-gray-600 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-violet-500 transition-colors" />
             </div>
           </div>
           <div>
             <label className="text-xs text-gray-500 block mb-1">{T.activityDesc}</label>
-            <textarea value={newActivity.description} onChange={e => onNewActivityChange({ description: e.target.value })} rows={2}
+            <textarea value={newEvent.description} onChange={e => onNewEventChange({ description: e.target.value })} rows={2}
               className="w-full bg-gray-700 border border-gray-600 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-violet-500 transition-colors resize-none" />
           </div>
           <p className="text-xs text-gray-600">{T.autoLink(dealName)}</p>
