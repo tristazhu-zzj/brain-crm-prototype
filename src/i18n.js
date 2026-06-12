@@ -39,6 +39,9 @@ export const t = {
     continueWith: '使用此',
     continue: '继续 →',
     matchBadge: '% 匹配',
+    searchDeal: '搜索',
+    searchDealPlaceholder: '搜索',
+    noResults: '没有找到匹配结果',
 
     // PropertyReview / PropertyCard
     stepReview: '审核 AI 生成内容',
@@ -144,6 +147,9 @@ export const t = {
     continueWith: 'この',
     continue: 'で続ける →',
     matchBadge: '% 一致',
+    searchDeal: '検索',
+    searchDealPlaceholder: '検索',
+    noResults: '一致する結果が見つかりません',
 
     // PropertyReview / PropertyCard
     stepReview: 'AI 生成内容を確認',
