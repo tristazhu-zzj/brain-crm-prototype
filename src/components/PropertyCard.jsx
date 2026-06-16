@@ -34,7 +34,7 @@ const AI_TASKS = [
 
 const NEW_PROPERTIES = []
 
-export default function PropertyCard({ crm, deal, onSync, T, lang }) {
+export default function PropertyCard({ crm, deal, onSync, T, lang, adminConfigured }) {
   const isSalesforce = crm === 'salesforce'
   const [properties, setProperties] = useState(INITIAL_PROPERTIES.map(p => ({ ...p, generatedVal: p.generated[lang] })))
   const [eventEnabled, setEventEnabled] = useState(isSalesforce)
@@ -68,6 +68,14 @@ export default function PropertyCard({ crm, deal, onSync, T, lang }) {
         <span className="text-gray-600">·</span>
         <span>{deal?.amount}</span>
       </div>
+
+      {/* First-time hint when no admin config */}
+      {!adminConfigured && (
+        <div className="bg-blue-900/20 border border-blue-700/40 rounded-xl px-3 py-2.5 flex items-start gap-2">
+          <span className="text-blue-400 text-sm shrink-0 mt-0.5">ℹ️</span>
+          <p className="text-xs text-blue-300 leading-relaxed">{T.noAdminConfigFirstUse}</p>
+        </div>
+      )}
 
       {/* Field count */}
       <p className="text-xs text-gray-500 uppercase tracking-wide">{T.fieldCount} ({included.length})</p>
