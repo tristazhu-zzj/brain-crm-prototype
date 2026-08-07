@@ -10,6 +10,7 @@ export default function App() {
   const [page, setPage] = useState('meeting')
   const T = t[lang]
 
+  const [isBusinessMeeting, setIsBusinessMeeting] = useState(true)
   const [adminConfigured, setAdminConfigured] = useState(false)
   const [userHadPersonalConfig, setUserHadPersonalConfig] = useState(true)
 
@@ -43,7 +44,7 @@ export default function App() {
           <div className="mt-auto pt-4 border-t border-gray-800 flex flex-col gap-2">
             <p className="text-xs text-gray-600 mb-1">{lang === 'zh' ? '演示状态' : 'デモ状態'}</p>
             {T.demoLabels.map((label, i) => {
-              const [val, setter] = [[adminConfigured, setAdminConfigured], [userHadPersonalConfig, setUserHadPersonalConfig]][i]
+              const [val, setter] = [[isBusinessMeeting, setIsBusinessMeeting], [adminConfigured, setAdminConfigured], [userHadPersonalConfig, setUserHadPersonalConfig]][i]
               return (
                 <label key={label} className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={val} onChange={e => setter(e.target.checked)} className="accent-violet-500" />
@@ -66,6 +67,7 @@ export default function App() {
           {page === 'meeting' && (
             <MeetingDetail
               lang={lang}
+              isBusinessMeeting={isBusinessMeeting}
               adminConfigured={adminConfigured}
               userHadPersonalConfig={userHadPersonalConfig}
             />

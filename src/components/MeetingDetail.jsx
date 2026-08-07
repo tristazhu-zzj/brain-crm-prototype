@@ -43,7 +43,7 @@ const AVAILABLE_PROPS = [
   { key: 'probability', label: 'Probability', type: 'number' },
 ]
 
-export default function MeetingDetail({ lang, adminConfigured, userHadPersonalConfig }) {
+export default function MeetingDetail({ lang, isBusinessMeeting, adminConfigured, userHadPersonalConfig }) {
   const T = t[lang]
 
   return (
@@ -94,6 +94,7 @@ export default function MeetingDetail({ lang, adminConfigured, userHadPersonalCo
         <BrainSidebar
           lang={lang}
           T={T}
+          isBusinessMeeting={isBusinessMeeting}
           adminConfigured={adminConfigured}
           userHadPersonalConfig={userHadPersonalConfig}
           context="meeting"
@@ -103,7 +104,23 @@ export default function MeetingDetail({ lang, adminConfigured, userHadPersonalCo
   )
 }
 
-export function BrainSidebar({ lang, T, adminConfigured, userHadPersonalConfig, context = 'meeting' }) {
+export function BrainSidebar({ lang, T, isBusinessMeeting = true, adminConfigured, userHadPersonalConfig, context = 'meeting' }) {
+  if (context === 'meeting' && !isBusinessMeeting) {
+    return <GeneralMeetingBrain T={T} />
+  }
+
+  return (
+    <CrmBrainSidebar
+      lang={lang}
+      T={T}
+      adminConfigured={adminConfigured}
+      userHadPersonalConfig={userHadPersonalConfig}
+      context={context}
+    />
+  )
+}
+
+function CrmBrainSidebar({ lang, T, adminConfigured, userHadPersonalConfig, context }) {
   const [input, setInput] = useState('')
   const [syncStarted, setSyncStarted] = useState(false)
   const [crm, setCrm] = useState(null)
@@ -232,6 +249,69 @@ export function BrainSidebar({ lang, T, adminConfigured, userHadPersonalConfig, 
             placeholder={context === 'standalone' ? T.brainCommandExample : T.inputPlaceholder}
             className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-violet-500 transition-colors placeholder-gray-600" />
           <button onClick={handleSend} className="bg-violet-600 hover:bg-violet-500 px-3 py-2 rounded-xl text-xs font-medium transition-colors">{T.sendMessage}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function GeneralMeetingBrain({ T }) {
+  const [input, setInput] = useState('')
+  const [messages, setMessages] = useState([])
+
+  function handleSend(text = input) {
+    const value = text.trim()
+    if (!value) return
+    setMessages(current => [
+      ...current,
+      { role: 'user', text: value },
+      { role: 'assistant', text: T.generalMeetingReply },
+    ])
+    setInput('')
+  }
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 overflow-y-auto p-4">
+        {messages.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center gap-5 pb-16">
+            <div className="w-10 h-10 rounded-2xl bg-violet-600/15 border border-violet-500/30 flex items-center justify-center text-lg">✨</div>
+            <p className="text-base font-semibold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
+              {T.generalMeetingGreeting}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 max-w-xs">
+              {T.generalMeetingActions.map(action => (
+                <button
+                  key={action.label}
+                  onClick={() => handleSend(action.label)}
+                  className="bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-violet-500/60 text-gray-300 text-xs px-3 py-2 rounded-xl transition-all"
+                >
+                  <span className="mr-1.5">{action.icon}</span>{action.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {messages.map((message, index) => (
+              <SidebarMessage key={index} m={message} T={T} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="p-3 border-t border-gray-800 shrink-0">
+        <div className="flex gap-2">
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSend()}
+            placeholder={T.inputPlaceholder}
+            className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-violet-500 transition-colors placeholder-gray-600"
+          />
+          <button onClick={() => handleSend()} className="bg-violet-600 hover:bg-violet-500 px-3 py-2 rounded-xl text-xs font-medium transition-colors">
+            {T.sendMessage}
+          </button>
         </div>
       </div>
     </div>
