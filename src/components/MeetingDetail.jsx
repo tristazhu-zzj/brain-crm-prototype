@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useLang } from '../LangContext.js'
 import { t } from '../i18n.js'
 import OAuthCard from './OAuthCard.jsx'
 import DealCard from './DealCard.jsx'
@@ -44,7 +43,7 @@ const AVAILABLE_PROPS = [
   { key: 'probability', label: 'Probability', type: 'number' },
 ]
 
-export default function MeetingDetail({ lang, isBusinessMeeting, adminConfigured, userHadPersonalConfig }) {
+export default function MeetingDetail({ lang, adminConfigured, userHadPersonalConfig }) {
   const T = t[lang]
 
   return (
@@ -95,16 +94,16 @@ export default function MeetingDetail({ lang, isBusinessMeeting, adminConfigured
         <BrainSidebar
           lang={lang}
           T={T}
-          isBusinessMeeting={isBusinessMeeting}
           adminConfigured={adminConfigured}
           userHadPersonalConfig={userHadPersonalConfig}
+          context="meeting"
         />
       </div>
     </div>
   )
 }
 
-function BrainSidebar({ lang, T, isBusinessMeeting, adminConfigured, userHadPersonalConfig }) {
+export function BrainSidebar({ lang, T, adminConfigured, userHadPersonalConfig, context = 'meeting' }) {
   const [input, setInput] = useState('')
   const [syncStarted, setSyncStarted] = useState(false)
   const [crm, setCrm] = useState(null)
@@ -117,25 +116,18 @@ function BrainSidebar({ lang, T, isBusinessMeeting, adminConfigured, userHadPers
     AVAILABLE_PROPS.slice(0, 5).map(p => p.key)
   )
 
-  // Has any CRM configured (admin or personal)?
   const hasCrmConfig = adminConfigured || userHadPersonalConfig
-  // CRM name to show in chip (only when configured)
-  const crmLabel = 'Salesforce' // in real app this would come from stored config
 
   function handleSync() {
     if (syncStarted) return
     setSyncStarted(true)
     if (userHadPersonalConfig && adminConfigured && !adminTakeoverShown) {
-      // Admin just took over — show notice, skip OAuth (already authorized), go to deal
       setAdminTakeoverShown(true)
       setExtraMessages(m => [...m, { role: 'assistant', text: T.adminTakeoverNotice, isNotice: true }])
       setTimeout(() => setFlow('deal'), 600)
     } else if (userHadPersonalConfig) {
-      // Already personally authorized — skip OAuth, go to deal
       setFlow('deal')
     } else {
-      // Need to authorize — go to OAuth
-      // If admin configured, OAuthCard will show only that CRM (no choice needed)
       setFlow('oauth')
     }
   }
@@ -152,15 +144,23 @@ function BrainSidebar({ lang, T, isBusinessMeeting, adminConfigured, userHadPers
   function handleSend() {
     if (!input.trim()) return
     const isSyncIntent = /同期|同步|salesforce|hubspot|crm/i.test(input)
-    const reply = isSyncIntent
-      ? { role: 'assistant', text: T.aiReplyChat, action: true }
-      : { role: 'assistant', text: T.aiReplyGeneric }
+    const hasMeetingReference = /@\S+/.test(input)
+    const needsMeetingReference = context === 'standalone' && isSyncIntent && !hasMeetingReference
+    const reply = needsMeetingReference
+      ? { role: 'assistant', text: T.brainMeetingRequired }
+      : isSyncIntent
+        ? { role: 'assistant', text: T.aiReplyChat, action: true }
+        : { role: 'assistant', text: T.aiReplyGeneric }
     setExtraMessages(m => [...m, { role: 'user', text: input }, reply])
     setInput('')
-    if (isSyncIntent && !syncStarted) setTimeout(() => handleSync(), 400)
   }
 
-  const initMessages = [{ role: 'assistant', text: T.aiGreeting }]
+  const initMessages = context === 'meeting'
+    ? [{ role: 'assistant', text: T.aiGreeting }]
+    : [
+        { role: 'user', text: T.brainCommandExample },
+        { role: 'assistant', text: T.aiReplyChat, action: true },
+      ]
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -171,7 +171,7 @@ function BrainSidebar({ lang, T, isBusinessMeeting, adminConfigured, userHadPers
         ))}
 
         {/* Recommended chips */}
-        {isBusinessMeeting && !syncStarted && (
+        {context === 'meeting' && !syncStarted && (
           <div className="flex flex-col gap-2">
             <p className="text-xs text-gray-500 flex items-center gap-1"><span>💡</span>{T.recommendedActions}</p>
             <button onClick={handleSync}
@@ -229,7 +229,7 @@ function BrainSidebar({ lang, T, isBusinessMeeting, adminConfigured, userHadPers
       <div className="p-3 border-t border-gray-800 shrink-0">
         <div className="flex gap-2">
           <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()}
-            placeholder={T.inputPlaceholder}
+            placeholder={context === 'standalone' ? T.brainCommandExample : T.inputPlaceholder}
             className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-violet-500 transition-colors placeholder-gray-600" />
           <button onClick={handleSend} className="bg-violet-600 hover:bg-violet-500 px-3 py-2 rounded-xl text-xs font-medium transition-colors">{T.sendMessage}</button>
         </div>

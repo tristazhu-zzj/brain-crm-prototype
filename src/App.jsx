@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { LangContext } from './LangContext.js'
 import { t } from './i18n.js'
+import BrainChat from './components/BrainChat.jsx'
 import MeetingDetail from './components/MeetingDetail.jsx'
 import SettingsPage from './components/SettingsPage.jsx'
 
@@ -9,8 +10,6 @@ export default function App() {
   const [page, setPage] = useState('meeting')
   const T = t[lang]
 
-  // Demo state — lifted here so MeetingDetail can receive and toggle
-  const [isBusinessMeeting, setIsBusinessMeeting] = useState(true)
   const [adminConfigured, setAdminConfigured] = useState(false)
   const [userHadPersonalConfig, setUserHadPersonalConfig] = useState(true)
 
@@ -30,6 +29,7 @@ export default function App() {
             </button>
           </div>
           {[
+            { id: 'brain', icon: '💬', label: 'Brain' },
             { id: 'meeting', icon: '📋', label: T.meetings },
             { id: 'settings', icon: '⚙️', label: T.settings },
           ].map(({ id, icon, label }) => (
@@ -43,7 +43,7 @@ export default function App() {
           <div className="mt-auto pt-4 border-t border-gray-800 flex flex-col gap-2">
             <p className="text-xs text-gray-600 mb-1">{lang === 'zh' ? '演示状态' : 'デモ状態'}</p>
             {T.demoLabels.map((label, i) => {
-              const [val, setter] = [[isBusinessMeeting, setIsBusinessMeeting], [adminConfigured, setAdminConfigured], [userHadPersonalConfig, setUserHadPersonalConfig]][i]
+              const [val, setter] = [[adminConfigured, setAdminConfigured], [userHadPersonalConfig, setUserHadPersonalConfig]][i]
               return (
                 <label key={label} className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={val} onChange={e => setter(e.target.checked)} className="accent-violet-500" />
@@ -56,10 +56,16 @@ export default function App() {
 
         {/* Main content */}
         <div className="flex-1 flex min-w-0">
+          {page === 'brain' && (
+            <BrainChat
+              lang={lang}
+              adminConfigured={adminConfigured}
+              userHadPersonalConfig={userHadPersonalConfig}
+            />
+          )}
           {page === 'meeting' && (
             <MeetingDetail
               lang={lang}
-              isBusinessMeeting={isBusinessMeeting}
               adminConfigured={adminConfigured}
               userHadPersonalConfig={userHadPersonalConfig}
             />

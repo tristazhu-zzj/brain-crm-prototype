@@ -17,6 +17,10 @@ export const t = {
     aiReplyGeneric: '收到！有什么其他需要帮忙的？',
     startSync: '开始同步到 CRM',
     aiReplyChat: '好的，我来帮你生成 CRM 字段内容并同步，点击下方按钮开始。',
+    brainPageSubtitle: '通过 @ 会议发起 CRM 同步',
+    brainStandaloneGreeting: '你好！请先 @ 一场会议，再告诉我需要总结并同步到 CRM 的内容。',
+    brainCommandExample: '@Q3 Business Review 请帮我总结会议后同步到 CRM 的 Property',
+    brainMeetingRequired: '请先用 @ 选择一场会议，例如：@Q3 Business Review 请帮我总结会议后同步到 CRM 的 Property。',
 
     // OAuthModal
     connectCRM: '连接你的 CRM',
@@ -111,7 +115,7 @@ export const t = {
     recommendSyncChip: '同步这次会议到 Salesforce',
     recommendSyncChipGeneric: '同步这次会议到 CRM',
     noAdminConfigHint: '管理员尚未配置团队字段，你可以自行选择要同步的字段',
-    demoLabels: ['商谈会议', 'Admin 已配置', '用户有个人配置'],
+    demoLabels: ['Admin 已配置', '用户有个人配置'],
     noAdminConfigFirstUse: '你可以选择要同步的字段，后续会记住你的选择。如果管理员为团队统一配置了字段，将以管理员的设置为准。',
     adminTakeoverNotice: '管理员已为团队统一配置了 CRM 同步字段，后续将使用团队配置，你的个人设置已停用。',
     syncing: '正在同步',
@@ -138,6 +142,10 @@ export const t = {
     aiReplyGeneric: '承知しました！他にお手伝いできることはありますか？',
     startSync: 'CRM への同期を開始',
     aiReplyChat: 'かしこまりました。CRM フィールドの内容を生成して同期します。下のボタンから開始してください。',
+    brainPageSubtitle: '@ メンションしたミーティングから CRM 同期を開始',
+    brainStandaloneGreeting: 'こんにちは！まず @ でミーティングを指定し、要約して CRM に同期したい内容を入力してください。',
+    brainCommandExample: '@Q3 Business Review ミーティングを要約して CRM の Property に同期して',
+    brainMeetingRequired: 'まず @ でミーティングを指定してください。例：@Q3 Business Review ミーティングを要約して CRM の Property に同期して。',
 
     // OAuthModal
     connectCRM: 'CRM を連携する',
@@ -232,7 +240,7 @@ export const t = {
     recommendSyncChip: 'このミーティングを Salesforce に同期',
     recommendSyncChipGeneric: 'このミーティングを CRM に同期',
     noAdminConfigHint: '管理者がチームフィールドを設定していません。同期するフィールドを自分で選択できます',
-    demoLabels: ['商談ミーティング', 'Admin 設定済み', 'ユーザー設定あり'],
+    demoLabels: ['Admin 設定済み', 'ユーザー設定あり'],
     noAdminConfigFirstUse: '同期するフィールドを選択できます。選択内容は次回以降も記憶されます。管理者がチームのフィールドを統一設定した場合は、管理者の設定が優先されます。',
     adminTakeoverNotice: '管理者がチームの CRM 同期フィールドを統一設定しました。今後はチーム設定が使用され、個人設定は停止されました。',
     syncing: '同期中',
